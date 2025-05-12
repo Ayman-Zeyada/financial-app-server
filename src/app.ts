@@ -4,10 +4,21 @@ import cors from 'cors';
 
 import routes from './routes';
 import { errorHandler, notFound } from './middlewares/errorHandler';
+import { sequelize } from './models';
+import logger from './utils/logger';
 
 const app: Application = express();
 
 dotenv.config();
+
+sequelize
+  .authenticate()
+  .then(() => {
+    logger.info('Database connection has been established successfully.');
+  })
+  .catch((err) => {
+    logger.error('Unable to connect to the database:', err);
+  });
 
 app.use(
   cors({
