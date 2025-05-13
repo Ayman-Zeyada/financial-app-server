@@ -16,15 +16,9 @@ export const generateAccessToken = (user: UserAttributes): string => {
   };
 
   // Default to 1 day in seconds if not provided
-  const expiresIn = process.env.JWT_EXPIRES_IN 
-    ? parseInt(process.env.JWT_EXPIRES_IN) 
-    : 86400; // 1 day in seconds
+  const expiresIn = process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) : 86400; // 1 day in seconds
 
-  return jwt.sign(
-    payload, 
-    process.env.JWT_SECRET || 'fallback_secret',
-    { expiresIn }
-  );
+  return jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn });
 };
 
 export const generateRefreshToken = (user: UserAttributes): string => {
@@ -35,23 +29,16 @@ export const generateRefreshToken = (user: UserAttributes): string => {
   };
 
   // Default to 7 days in seconds if not provided
-  const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN 
-    ? parseInt(process.env.JWT_REFRESH_EXPIRES_IN) 
+  const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN
+    ? parseInt(process.env.JWT_REFRESH_EXPIRES_IN)
     : 604800; // 7 days in seconds
 
-  return jwt.sign(
-    payload, 
-    process.env.JWT_SECRET || 'fallback_secret',
-    { expiresIn }
-  );
+  return jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn });
 };
 
 export const verifyToken = (token: string): TokenPayload | null => {
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || 'fallback_secret'
-    ) as TokenPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret') as TokenPayload;
     return decoded;
   } catch (error) {
     logger.error(`Token verification failed: ${error}`);
@@ -60,11 +47,9 @@ export const verifyToken = (token: string): TokenPayload | null => {
 };
 
 export const generateResetToken = (): string => {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
 
 export const generateVerificationToken = (): string => {
-  return Math.random().toString(36).substring(2, 15) + 
-         Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };

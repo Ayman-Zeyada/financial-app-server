@@ -1,63 +1,30 @@
-import { sequelize } from '../config/database';
 import User from './user.model';
 import Category from './category.model';
 import Transaction from './transaction.model';
 import Budget from './budget.model';
+import UserPreference from './userPreference.model';
+import FinancialGoal from './financialGoal.model';
+import { sequelize } from '../config/database';
 
-// Define associations
-User.hasMany(Category, {
-  sourceKey: 'id',
-  foreignKey: 'userId',
-  as: 'categories',
-});
+User.hasMany(Category, { foreignKey: 'userId' });
+Category.belongsTo(User, { foreignKey: 'userId' });
 
-User.hasMany(Transaction, {
-  sourceKey: 'id',
-  foreignKey: 'userId',
-  as: 'transactions',
-});
+User.hasMany(Transaction, { foreignKey: 'userId' });
+Transaction.belongsTo(User, { foreignKey: 'userId' });
 
-User.hasMany(Budget, {
-  sourceKey: 'id',
-  foreignKey: 'userId',
-  as: 'budgets',
-});
+User.hasMany(Budget, { foreignKey: 'userId' });
+Budget.belongsTo(User, { foreignKey: 'userId' });
 
-Category.belongsTo(User, {
-  foreignKey: 'userId',
-  as: 'user',
-});
+Category.hasMany(Transaction, { foreignKey: 'categoryId' });
+Transaction.belongsTo(Category, { foreignKey: 'categoryId' });
 
-Category.hasMany(Transaction, {
-  sourceKey: 'id',
-  foreignKey: 'categoryId',
-  as: 'transactions',
-});
+Category.hasMany(Budget, { foreignKey: 'categoryId' });
+Budget.belongsTo(Category, { foreignKey: 'categoryId' });
 
-Category.hasMany(Budget, {
-  sourceKey: 'id',
-  foreignKey: 'categoryId',
-  as: 'budgets',
-});
+User.hasOne(UserPreference, { foreignKey: 'userId' });
+UserPreference.belongsTo(User, { foreignKey: 'userId' });
 
-Transaction.belongsTo(User, {
-  foreignKey: 'userId',
-  as: 'user',
-});
+User.hasMany(FinancialGoal, { foreignKey: 'userId' });
+FinancialGoal.belongsTo(User, { foreignKey: 'userId' });
 
-Transaction.belongsTo(Category, {
-  foreignKey: 'categoryId',
-  as: 'category',
-});
-
-Budget.belongsTo(User, {
-  foreignKey: 'userId',
-  as: 'user',
-});
-
-Budget.belongsTo(Category, {
-  foreignKey: 'categoryId',
-  as: 'category',
-});
-
-export { sequelize, User, Category, Transaction, Budget };
+export { sequelize, User, Category, Transaction, Budget, UserPreference, FinancialGoal };

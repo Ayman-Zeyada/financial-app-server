@@ -13,11 +13,7 @@ import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email.ut
 import { ApiError } from '../middlewares/errorHandler';
 import logger from '../utils/logger';
 
-export const register = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { username, email, password, firstName, lastName } = req.body;
 
@@ -64,11 +60,7 @@ export const register = async (
   }
 };
 
-export const login = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { username, password } = req.body;
 
@@ -124,7 +116,7 @@ export const login = async (
 export const refreshToken = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { refreshToken } = req.body;
@@ -171,7 +163,7 @@ export const refreshToken = async (
 export const verifyEmail = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { token } = req.params;
@@ -201,7 +193,7 @@ export const verifyEmail = async (
 export const requestPasswordReset = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { email } = req.body;
@@ -238,7 +230,7 @@ export const requestPasswordReset = async (
 export const resetPassword = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { token } = req.params;
@@ -278,7 +270,7 @@ export const resetPassword = async (
 export const getCurrentUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -288,7 +280,9 @@ export const getCurrentUser = async (
     }
 
     const user = await User.findByPk(req.user.userId, {
-      attributes: { exclude: ['password', 'verificationToken', 'resetPasswordToken', 'resetPasswordExpires'] },
+      attributes: {
+        exclude: ['password', 'verificationToken', 'resetPasswordToken', 'resetPasswordExpires'],
+      },
     });
 
     if (!user) {

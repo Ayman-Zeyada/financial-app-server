@@ -12,6 +12,7 @@ export interface UserAttributes {
   verificationToken?: string;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  avatarUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -29,8 +30,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public verificationToken?: string;
   public resetPasswordToken?: string;
   public resetPasswordExpires?: Date;
+  public avatarUrl?: string;
 
-  // Timestamps
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -91,6 +92,10 @@ User.init(
     },
     resetPasswordExpires: {
       type: DataTypes.DATE,
+      allowNull: true,
+    },
+    avatarUrl: {
+      type: DataTypes.STRING(200),
       allowNull: true,
     },
   },
