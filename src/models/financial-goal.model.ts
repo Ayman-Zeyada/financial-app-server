@@ -10,12 +10,13 @@ export interface FinancialGoalAttributes {
   targetDate: Date;
   description?: string;
   category?: string;
+  notificationSent?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export interface FinancialGoalCreationAttributes
-  extends Optional<FinancialGoalAttributes, 'id' | 'currentAmount'> {}
+  extends Optional<FinancialGoalAttributes, 'id' | 'currentAmount' | 'notificationSent'> {}
 
 class FinancialGoal
   extends Model<FinancialGoalAttributes, FinancialGoalCreationAttributes>
@@ -29,6 +30,7 @@ class FinancialGoal
   public targetDate!: Date;
   public description?: string;
   public category?: string;
+  public notificationSent?: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -86,6 +88,11 @@ FinancialGoal.init(
     category: {
       type: DataTypes.STRING(50),
       allowNull: true,
+    },
+    notificationSent: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {

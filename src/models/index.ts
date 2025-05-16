@@ -3,7 +3,7 @@ import Category from './category.model';
 import Transaction from './transaction.model';
 import Budget from './budget.model';
 import UserPreference from './userPreference.model';
-import FinancialGoal from './financialGoal.model';
+import FinancialGoal from './financial-goal.model';
 import { sequelize } from '../config/database';
 
 User.hasMany(Category, { foreignKey: 'userId' });

@@ -1,11 +1,13 @@
 import express, { Application } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path';
 
 import routes from './routes';
 import { errorHandler, notFound } from './middlewares/errorHandler';
 import { sequelize } from './models';
 import logger from './utils/logger';
+import { financialScheduler } from './services/financial-scheduler.service';
 
 const app: Application = express();
 
@@ -32,9 +34,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 app.use('/api', routes);
 
 app.use(notFound);
 app.use(errorHandler);
+
+if (process.env.NODE_ENV === 'production') {
+  financialScheduler.start();
+  logger.info('Financial scheduler started in production mode');
+}
 
 export default app;
