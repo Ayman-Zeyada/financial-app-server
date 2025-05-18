@@ -6,6 +6,7 @@ import categoryRoutes from './category.routes';
 import budgetRoutes from './budget.routes';
 import reportRoutes from './report.routes';
 import financialGoalRoutes from './financial-goal.routes';
+import dataProcessingRoutes from './data-processing.routes';
 
 const router: Router = express.Router();
 
@@ -20,5 +21,6 @@ router.use('/categories', categoryRoutes);
 router.use('/budgets', budgetRoutes);
 router.use('/goals', financialGoalRoutes);
 router.use('/reports', reportRoutes);
+router.use('/data', dataProcessingRoutes);
 
 export default router;
