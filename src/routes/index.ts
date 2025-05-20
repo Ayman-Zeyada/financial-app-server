@@ -7,6 +7,7 @@ import budgetRoutes from './budget.routes';
 import reportRoutes from './report.routes';
 import financialGoalRoutes from './financial-goal.routes';
 import dataProcessingRoutes from './data-processing.routes';
+import webhookRoutes from './webhook.routes';
 
 const router: Router = express.Router();
 
@@ -22,5 +23,6 @@ router.use('/budgets', budgetRoutes);
 router.use('/goals', financialGoalRoutes);
 router.use('/reports', reportRoutes);
 router.use('/data', dataProcessingRoutes);
+router.use('/webhooks', webhookRoutes);
 
 export default router;

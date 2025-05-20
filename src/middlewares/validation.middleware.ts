@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ApiError } from './errorHandler';
+import { ApiError } from './error-handler.middleware';
 
 export interface ValidationSchema {
   [key: string]: {

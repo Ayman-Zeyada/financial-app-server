@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { FinancialGoal } from '../models';
-import { ApiError } from '../middlewares/errorHandler';
+import { ApiError } from '../middlewares/error-handler.middleware';
 import { financialGoalsService } from '../services/financial-goals.service';
 
 export const createFinancialGoal = async (

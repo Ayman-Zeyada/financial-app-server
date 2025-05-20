@@ -2,8 +2,9 @@ import User from './user.model';
 import Category from './category.model';
 import Transaction from './transaction.model';
 import Budget from './budget.model';
-import UserPreference from './userPreference.model';
+import UserPreference from './user-preference.model';
 import FinancialGoal from './financial-goal.model';
+import Webhook from './webhook.model';
 import { sequelize } from '../config/database';
 
 User.hasMany(Category, { foreignKey: 'userId' });
@@ -27,4 +28,7 @@ UserPreference.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(FinancialGoal, { foreignKey: 'userId' });
 FinancialGoal.belongsTo(User, { foreignKey: 'userId' });
 
-export { sequelize, User, Category, Transaction, Budget, UserPreference, FinancialGoal };
+User.hasMany(Webhook, { foreignKey: 'userId' });
+Webhook.belongsTo(User, { foreignKey: 'userId' });
+
+export { sequelize, User, Category, Transaction, Budget, UserPreference, FinancialGoal, Webhook };

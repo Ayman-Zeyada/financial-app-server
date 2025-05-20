@@ -20,7 +20,7 @@ class DataProcessingService {
   public async exportTransactionsToCSV(
     userId: number,
     filters: any = {},
-    filePath?: string
+    filePath?: string,
   ): Promise<{ filePath: string; data: string }> {
     try {
       const where: any = {
@@ -98,17 +98,13 @@ class DataProcessingService {
         logger.info(`Exported ${formattedData.length} transactions to ${filePath}`);
       } else {
         const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        filePath = path.join(
-          __dirname,
-          '../../exports',
-          `transactions_${userId}_${timestamp}.csv`
-        );
-        
+        filePath = path.join(__dirname, '../../exports', `transactions_${userId}_${timestamp}.csv`);
+
         const directory = path.dirname(filePath);
         if (!fs.existsSync(directory)) {
           fs.mkdirSync(directory, { recursive: true });
         }
-        
+
         fs.writeFileSync(filePath, csv);
         logger.info(`Exported ${formattedData.length} transactions to ${filePath}`);
       }
@@ -122,7 +118,7 @@ class DataProcessingService {
 
   public async exportCategoriesToCSV(
     userId: number,
-    filePath?: string
+    filePath?: string,
   ): Promise<{ filePath: string; data: string }> {
     try {
       const categories = await Category.findAll({
@@ -154,17 +150,13 @@ class DataProcessingService {
         logger.info(`Exported ${formattedData.length} categories to ${filePath}`);
       } else {
         const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        filePath = path.join(
-          __dirname,
-          '../../exports',
-          `categories_${userId}_${timestamp}.csv`
-        );
-        
+        filePath = path.join(__dirname, '../../exports', `categories_${userId}_${timestamp}.csv`);
+
         const directory = path.dirname(filePath);
         if (!fs.existsSync(directory)) {
           fs.mkdirSync(directory, { recursive: true });
         }
-        
+
         fs.writeFileSync(filePath, csv);
         logger.info(`Exported ${formattedData.length} categories to ${filePath}`);
       }
@@ -178,7 +170,7 @@ class DataProcessingService {
 
   public async exportBudgetsToCSV(
     userId: number,
-    filePath?: string
+    filePath?: string,
   ): Promise<{ filePath: string; data: string }> {
     try {
       const budgets = await Budget.findAll({
@@ -228,17 +220,13 @@ class DataProcessingService {
         logger.info(`Exported ${formattedData.length} budgets to ${filePath}`);
       } else {
         const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        filePath = path.join(
-          __dirname,
-          '../../exports',
-          `budgets_${userId}_${timestamp}.csv`
-        );
-        
+        filePath = path.join(__dirname, '../../exports', `budgets_${userId}_${timestamp}.csv`);
+
         const directory = path.dirname(filePath);
         if (!fs.existsSync(directory)) {
           fs.mkdirSync(directory, { recursive: true });
         }
-        
+
         fs.writeFileSync(filePath, csv);
         logger.info(`Exported ${formattedData.length} budgets to ${filePath}`);
       }
@@ -252,7 +240,7 @@ class DataProcessingService {
 
   public async exportFinancialGoalsToCSV(
     userId: number,
-    filePath?: string
+    filePath?: string,
   ): Promise<{ filePath: string; data: string }> {
     try {
       const goals = await FinancialGoal.findAll({
@@ -293,17 +281,13 @@ class DataProcessingService {
         logger.info(`Exported ${formattedData.length} financial goals to ${filePath}`);
       } else {
         const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
-        filePath = path.join(
-          __dirname,
-          '../../exports',
-          `goals_${userId}_${timestamp}.csv`
-        );
-        
+        filePath = path.join(__dirname, '../../exports', `goals_${userId}_${timestamp}.csv`);
+
         const directory = path.dirname(filePath);
         if (!fs.existsSync(directory)) {
           fs.mkdirSync(directory, { recursive: true });
         }
-        
+
         fs.writeFileSync(filePath, csv);
         logger.info(`Exported ${formattedData.length} financial goals to ${filePath}`);
       }
@@ -337,12 +321,12 @@ class DataProcessingService {
       }
 
       const jsonArray = await csv().fromFile(filePath);
-      
+
       const categories = await Category.findAll({
         where: { userId },
         attributes: ['id', 'name', 'type'],
       });
-      
+
       const categoryMap = categories.reduce((acc: Record<string, any>, category: any) => {
         acc[category.id] = category;
         acc[category.name.toLowerCase()] = category;
@@ -387,7 +371,7 @@ class DataProcessingService {
 
           if (categoryMap[categoryId] && categoryMap[categoryId].type !== row.type) {
             result.errors.push(
-              `Row ${i + 1}: Transaction type (${row.type}) doesn't match category type (${categoryMap[categoryId].type})`
+              `Row ${i + 1}: Transaction type (${row.type}) doesn't match category type (${categoryMap[categoryId].type})`,
             );
             continue;
           }
@@ -395,11 +379,14 @@ class DataProcessingService {
           let recurring = false;
           let recurringInterval: string | undefined = undefined;
           if (typeof row.recurring === 'string') {
-            recurring = row.recurring.toLowerCase() === 'yes' || row.recurring === 'true' || row.recurring === '1';
+            recurring =
+              row.recurring.toLowerCase() === 'yes' ||
+              row.recurring === 'true' ||
+              row.recurring === '1';
           } else if (typeof row.recurring === 'boolean') {
             recurring = row.recurring;
           }
-          
+
           if (row.recurringInterval) {
             recurringInterval = row.recurringInterval;
           }
@@ -458,14 +445,14 @@ class DataProcessingService {
       }
 
       const jsonArray = await csv().fromFile(filePath);
-      
+
       const existingCategories = await Category.findAll({
         where: { userId },
         attributes: ['name'],
       });
-      
+
       const existingCategoryNames = new Set(
-        existingCategories.map((cat: any) => cat.name.toLowerCase())
+        existingCategories.map((cat: any) => cat.name.toLowerCase()),
       );
 
       const categoriesToCreate = [];
@@ -490,7 +477,9 @@ class DataProcessingService {
           }
 
           if (row.color && !/^#[0-9A-F]{6}$/i.test(row.color)) {
-            result.errors.push(`Row ${i + 1}: Invalid color format. Must be a valid hex color (e.g., #RRGGBB)`);
+            result.errors.push(
+              `Row ${i + 1}: Invalid color format. Must be a valid hex color (e.g., #RRGGBB)`,
+            );
             continue;
           }
 
@@ -548,12 +537,12 @@ class DataProcessingService {
       }
 
       const jsonArray = await csv().fromFile(filePath);
-      
+
       const categories = await Category.findAll({
         where: { userId },
         attributes: ['id', 'name', 'type'],
       });
-      
+
       const categoryMap = categories.reduce((acc: Record<string, any>, category: any) => {
         acc[category.id] = category;
         acc[category.name.toLowerCase()] = category;
@@ -593,7 +582,7 @@ class DataProcessingService {
               continue;
             }
             endDate = new Date(row.endDate);
-            
+
             if (endDate <= new Date(row.startDate)) {
               result.errors.push(`Row ${i + 1}: End date must be after start date`);
               continue;
@@ -608,9 +597,7 @@ class DataProcessingService {
           }
 
           if (categoryId && categoryMap[categoryId] && categoryMap[categoryId].type !== 'EXPENSE') {
-            result.errors.push(
-              `Row ${i + 1}: Budgets can only be created for expense categories`
-            );
+            result.errors.push(`Row ${i + 1}: Budgets can only be created for expense categories`);
             continue;
           }
 
@@ -645,7 +632,10 @@ class DataProcessingService {
     }
   }
 
-  public async importFinancialGoalsFromCSV(userId: number, filePath: string): Promise<ImportResult> {
+  public async importFinancialGoalsFromCSV(
+    userId: number,
+    filePath: string,
+  ): Promise<ImportResult> {
     try {
       const result: ImportResult = {
         success: false,
@@ -667,7 +657,7 @@ class DataProcessingService {
       }
 
       const jsonArray = await csv().fromFile(filePath);
-      
+
       const goalsToCreate = [];
 
       for (let i = 0; i < jsonArray.length; i++) {
@@ -690,7 +680,7 @@ class DataProcessingService {
               continue;
             }
             currentAmount = parseFloat(row.currentAmount);
-            
+
             if (currentAmount < 0) {
               result.errors.push(`Row ${i + 1}: Current amount cannot be negative`);
               continue;
@@ -751,48 +741,50 @@ class DataProcessingService {
       if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory, { recursive: true });
       }
-      
+
       fs.writeFileSync(tempFilePath, csvString);
-      
+
       const jsonArray = await csv().fromFile(tempFilePath);
-      
+
       fs.unlinkSync(tempFilePath);
-      
+
       const errors: string[] = [];
       const validTransactionTypes = Object.values(TransactionType);
-      
+
       const requiredFields = ['amount', 'description', 'date', 'type'];
-      
+
       const headers = Object.keys(jsonArray[0] || {});
-      const missingFields = requiredFields.filter(field => !headers.includes(field));
-      
+      const missingFields = requiredFields.filter((field) => !headers.includes(field));
+
       if (missingFields.length > 0) {
         errors.push(`Missing required fields: ${missingFields.join(', ')}`);
         return { valid: false, errors };
       }
-      
+
       jsonArray.forEach((row, i) => {
         if (!row.amount || isNaN(parseFloat(row.amount))) {
           errors.push(`Row ${i + 1}: Invalid amount`);
         }
-        
+
         if (!row.description) {
           errors.push(`Row ${i + 1}: Missing description`);
         }
-        
+
         if (!row.date || isNaN(new Date(row.date).getTime())) {
           errors.push(`Row ${i + 1}: Invalid date`);
         }
-        
+
         if (!row.type || !validTransactionTypes.includes(row.type)) {
-          errors.push(`Row ${i + 1}: Invalid transaction type (must be INCOME, EXPENSE, or TRANSFER)`);
+          errors.push(
+            `Row ${i + 1}: Invalid transaction type (must be INCOME, EXPENSE, or TRANSFER)`,
+          );
         }
-        
+
         if (row.categoryId && isNaN(parseInt(row.categoryId))) {
           errors.push(`Row ${i + 1}: Category ID must be a number`);
         }
       });
-      
+
       return {
         valid: errors.length === 0,
         errors,
@@ -818,40 +810,42 @@ class DataProcessingService {
       if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory, { recursive: true });
       }
-      
+
       fs.writeFileSync(tempFilePath, csvString);
-      
+
       const jsonArray = await csv().fromFile(tempFilePath);
-      
+
       fs.unlinkSync(tempFilePath);
-      
+
       const errors: string[] = [];
       const validCategoryTypes = Object.values(CategoryType);
-      
+
       const requiredFields = ['name', 'type'];
-      
+
       const headers = Object.keys(jsonArray[0] || {});
-      const missingFields = requiredFields.filter(field => !headers.includes(field));
-      
+      const missingFields = requiredFields.filter((field) => !headers.includes(field));
+
       if (missingFields.length > 0) {
         errors.push(`Missing required fields: ${missingFields.join(', ')}`);
         return { valid: false, errors };
       }
-      
+
       jsonArray.forEach((row, i) => {
         if (!row.name) {
           errors.push(`Row ${i + 1}: Missing name`);
         }
-        
+
         if (!row.type || !validCategoryTypes.includes(row.type)) {
           errors.push(`Row ${i + 1}: Invalid category type (must be INCOME or EXPENSE)`);
         }
-        
+
         if (row.color && !/^#[0-9A-F]{6}$/i.test(row.color)) {
-          errors.push(`Row ${i + 1}: Invalid color format. Must be a valid hex color (e.g., #RRGGBB)`);
+          errors.push(
+            `Row ${i + 1}: Invalid color format. Must be a valid hex color (e.g., #RRGGBB)`,
+          );
         }
       });
-      
+
       return {
         valid: errors.length === 0,
         errors,
@@ -877,52 +871,52 @@ class DataProcessingService {
       if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory, { recursive: true });
       }
-      
+
       fs.writeFileSync(tempFilePath, csvString);
-      
+
       const jsonArray = await csv().fromFile(tempFilePath);
-      
+
       fs.unlinkSync(tempFilePath);
-      
+
       const errors: string[] = [];
       const validPeriods = ['daily', 'weekly', 'monthly', 'yearly'];
-      
+
       const requiredFields = ['name', 'amount', 'period', 'startDate'];
-      
+
       const headers = Object.keys(jsonArray[0] || {});
-      const missingFields = requiredFields.filter(field => !headers.includes(field));
-      
+      const missingFields = requiredFields.filter((field) => !headers.includes(field));
+
       if (missingFields.length > 0) {
         errors.push(`Missing required fields: ${missingFields.join(', ')}`);
         return { valid: false, errors };
       }
-      
+
       jsonArray.forEach((row, i) => {
         if (!row.name) {
           errors.push(`Row ${i + 1}: Missing name`);
         }
-        
+
         if (!row.amount || isNaN(parseFloat(row.amount))) {
           errors.push(`Row ${i + 1}: Invalid amount`);
         }
-        
+
         if (!row.period || !validPeriods.includes(row.period)) {
           errors.push(`Row ${i + 1}: Invalid period (must be daily, weekly, monthly, or yearly)`);
         }
-        
+
         if (!row.startDate || isNaN(new Date(row.startDate).getTime())) {
           errors.push(`Row ${i + 1}: Invalid start date`);
         }
-        
+
         if (row.endDate && isNaN(new Date(row.endDate).getTime())) {
           errors.push(`Row ${i + 1}: Invalid end date`);
         }
-        
+
         if (row.categoryId && isNaN(parseInt(row.categoryId))) {
           errors.push(`Row ${i + 1}: Category ID must be a number`);
         }
       });
-      
+
       return {
         valid: errors.length === 0,
         errors,
@@ -948,38 +942,38 @@ class DataProcessingService {
       if (!fs.existsSync(directory)) {
         fs.mkdirSync(directory, { recursive: true });
       }
-      
+
       fs.writeFileSync(tempFilePath, csvString);
-      
+
       const jsonArray = await csv().fromFile(tempFilePath);
-      
+
       fs.unlinkSync(tempFilePath);
-      
+
       const errors: string[] = [];
-      
+
       const requiredFields = ['name', 'targetAmount', 'targetDate'];
-      
+
       const headers = Object.keys(jsonArray[0] || {});
-      const missingFields = requiredFields.filter(field => !headers.includes(field));
-      
+      const missingFields = requiredFields.filter((field) => !headers.includes(field));
+
       if (missingFields.length > 0) {
         errors.push(`Missing required fields: ${missingFields.join(', ')}`);
         return { valid: false, errors };
       }
-      
+
       jsonArray.forEach((row, i) => {
         if (!row.name) {
           errors.push(`Row ${i + 1}: Missing name`);
         }
-        
+
         if (!row.targetAmount || isNaN(parseFloat(row.targetAmount))) {
           errors.push(`Row ${i + 1}: Invalid target amount`);
         }
-        
+
         if (row.currentAmount && isNaN(parseFloat(row.currentAmount))) {
           errors.push(`Row ${i + 1}: Invalid current amount`);
         }
-        
+
         if (!row.targetDate || isNaN(new Date(row.targetDate).getTime())) {
           errors.push(`Row ${i + 1}: Invalid target date`);
         } else {
@@ -989,7 +983,7 @@ class DataProcessingService {
           }
         }
       });
-      
+
       return {
         valid: errors.length === 0,
         errors,
@@ -1006,7 +1000,7 @@ class DataProcessingService {
 
   public validateJSONImport(
     jsonString: string,
-    dataType: 'transactions' | 'categories' | 'budgets' | 'goals'
+    dataType: 'transactions' | 'categories' | 'budgets' | 'goals',
   ): {
     valid: boolean;
     errors: string[];
@@ -1022,16 +1016,16 @@ class DataProcessingService {
           errors: ['Invalid JSON format: ' + (error instanceof Error ? error.message : error)],
         };
       }
-      
+
       if (!Array.isArray(data)) {
         return {
           valid: false,
           errors: ['Data must be an array'],
         };
       }
-      
+
       const errors: string[] = [];
-      
+
       switch (dataType) {
         case 'transactions':
           return this.validateTransactionsJSON(data);
@@ -1063,31 +1057,33 @@ class DataProcessingService {
   } {
     const errors: string[] = [];
     const validTransactionTypes = Object.values(TransactionType);
-    
+
     data.forEach((item, i) => {
       if (!item.amount || isNaN(parseFloat(item.amount))) {
         errors.push(`Item ${i + 1}: Invalid amount`);
       }
-      
+
       if (!item.description) {
         errors.push(`Item ${i + 1}: Missing description`);
       }
-      
+
       if (!item.date || isNaN(new Date(item.date).getTime())) {
         errors.push(`Item ${i + 1}: Invalid date`);
       }
-      
+
       if (!item.type || !validTransactionTypes.includes(item.type)) {
-        errors.push(`Item ${i + 1}: Invalid transaction type (must be INCOME, EXPENSE, or TRANSFER)`);
+        errors.push(
+          `Item ${i + 1}: Invalid transaction type (must be INCOME, EXPENSE, or TRANSFER)`,
+        );
       }
-      
+
       if (!item.categoryId) {
         errors.push(`Item ${i + 1}: Missing categoryId`);
       } else if (isNaN(parseInt(item.categoryId))) {
         errors.push(`Item ${i + 1}: categoryId must be a number`);
       }
     });
-    
+
     return {
       valid: errors.length === 0,
       errors,
@@ -1102,21 +1098,23 @@ class DataProcessingService {
   } {
     const errors: string[] = [];
     const validCategoryTypes = Object.values(CategoryType);
-    
+
     data.forEach((item, i) => {
       if (!item.name) {
         errors.push(`Item ${i + 1}: Missing name`);
       }
-      
+
       if (!item.type || !validCategoryTypes.includes(item.type)) {
         errors.push(`Item ${i + 1}: Invalid category type (must be INCOME or EXPENSE)`);
       }
-      
+
       if (item.color && !/^#[0-9A-F]{6}$/i.test(item.color)) {
-        errors.push(`Item ${i + 1}: Invalid color format. Must be a valid hex color (e.g., #RRGGBB)`);
+        errors.push(
+          `Item ${i + 1}: Invalid color format. Must be a valid hex color (e.g., #RRGGBB)`,
+        );
       }
     });
-    
+
     return {
       valid: errors.length === 0,
       errors,
@@ -1131,33 +1129,33 @@ class DataProcessingService {
   } {
     const errors: string[] = [];
     const validPeriods = ['daily', 'weekly', 'monthly', 'yearly'];
-    
+
     data.forEach((item, i) => {
       if (!item.name) {
         errors.push(`Item ${i + 1}: Missing name`);
       }
-      
+
       if (!item.amount || isNaN(parseFloat(item.amount))) {
         errors.push(`Item ${i + 1}: Invalid amount`);
       }
-      
+
       if (!item.period || !validPeriods.includes(item.period)) {
         errors.push(`Item ${i + 1}: Invalid period (must be daily, weekly, monthly, or yearly)`);
       }
-      
+
       if (!item.startDate || isNaN(new Date(item.startDate).getTime())) {
         errors.push(`Item ${i + 1}: Invalid startDate`);
       }
-      
+
       if (item.endDate && isNaN(new Date(item.endDate).getTime())) {
         errors.push(`Item ${i + 1}: Invalid endDate`);
       }
-      
+
       if (item.categoryId && isNaN(parseInt(item.categoryId))) {
         errors.push(`Item ${i + 1}: categoryId must be a number`);
       }
     });
-    
+
     return {
       valid: errors.length === 0,
       errors,
@@ -1171,20 +1169,20 @@ class DataProcessingService {
     data?: any[];
   } {
     const errors: string[] = [];
-    
+
     data.forEach((item, i) => {
       if (!item.name) {
         errors.push(`Item ${i + 1}: Missing name`);
       }
-      
+
       if (!item.targetAmount || isNaN(parseFloat(item.targetAmount))) {
         errors.push(`Item ${i + 1}: Invalid targetAmount`);
       }
-      
+
       if (item.currentAmount && isNaN(parseFloat(item.currentAmount))) {
         errors.push(`Item ${i + 1}: Invalid currentAmount`);
       }
-      
+
       if (!item.targetDate || isNaN(new Date(item.targetDate).getTime())) {
         errors.push(`Item ${i + 1}: Invalid targetDate`);
       } else {
@@ -1194,7 +1192,7 @@ class DataProcessingService {
         }
       }
     });
-    
+
     return {
       valid: errors.length === 0,
       errors,
@@ -1205,7 +1203,7 @@ class DataProcessingService {
   public async importFromJSON(
     userId: number,
     data: any[],
-    dataType: 'transactions' | 'categories' | 'budgets' | 'goals'
+    dataType: 'transactions' | 'categories' | 'budgets' | 'goals',
   ): Promise<ImportResult> {
     try {
       const result: ImportResult = {
@@ -1253,7 +1251,7 @@ class DataProcessingService {
       where: { userId },
       attributes: ['id', 'type'],
     });
-    
+
     const categoryMap = categories.reduce((acc: Record<number, any>, category: any) => {
       acc[category.id] = category;
       return acc;
@@ -1291,7 +1289,7 @@ class DataProcessingService {
         }
 
         const categoryId = parseInt(item.categoryId);
-        
+
         if (!categoryMap[categoryId]) {
           result.errors.push(`Item ${i + 1}: Category not found or does not belong to user`);
           continue;
@@ -1299,7 +1297,7 @@ class DataProcessingService {
 
         if (categoryMap[categoryId].type !== item.type) {
           result.errors.push(
-            `Item ${i + 1}: Transaction type (${item.type}) doesn't match category type (${categoryMap[categoryId].type})`
+            `Item ${i + 1}: Transaction type (${item.type}) doesn't match category type (${categoryMap[categoryId].type})`,
           );
           continue;
         }
@@ -1345,9 +1343,9 @@ class DataProcessingService {
       where: { userId },
       attributes: ['name'],
     });
-    
+
     const existingCategoryNames = new Set(
-      existingCategories.map((cat: any) => cat.name.toLowerCase())
+      existingCategories.map((cat: any) => cat.name.toLowerCase()),
     );
 
     const categoriesToCreate = [];
@@ -1372,7 +1370,9 @@ class DataProcessingService {
         }
 
         if (item.color && !/^#[0-9A-F]{6}$/i.test(item.color)) {
-          result.errors.push(`Item ${i + 1}: Invalid color format. Must be a valid hex color (e.g., #RRGGBB)`);
+          result.errors.push(
+            `Item ${i + 1}: Invalid color format. Must be a valid hex color (e.g., #RRGGBB)`,
+          );
           continue;
         }
 
@@ -1417,7 +1417,7 @@ class DataProcessingService {
       where: { userId },
       attributes: ['id', 'type'],
     });
-    
+
     const categoryMap = categories.reduce((acc: Record<number, any>, category: any) => {
       acc[category.id] = category;
       return acc;
@@ -1456,7 +1456,7 @@ class DataProcessingService {
             continue;
           }
           endDate = new Date(item.endDate);
-          
+
           if (endDate <= new Date(item.startDate)) {
             result.errors.push(`Item ${i + 1}: End date must be after start date`);
             continue;
@@ -1466,16 +1466,14 @@ class DataProcessingService {
         let categoryId;
         if (item.categoryId) {
           categoryId = parseInt(item.categoryId);
-          
+
           if (!categoryMap[categoryId]) {
             result.errors.push(`Item ${i + 1}: Category not found or does not belong to user`);
             continue;
           }
 
           if (categoryMap[categoryId].type !== 'EXPENSE') {
-            result.errors.push(
-              `Item ${i + 1}: Budgets can only be created for expense categories`
-            );
+            result.errors.push(`Item ${i + 1}: Budgets can only be created for expense categories`);
             continue;
           }
         }
@@ -1538,7 +1536,7 @@ class DataProcessingService {
             continue;
           }
           currentAmount = parseFloat(item.currentAmount);
-          
+
           if (currentAmount < 0) {
             result.errors.push(`Item ${i + 1}: Current amount cannot be negative`);
             continue;

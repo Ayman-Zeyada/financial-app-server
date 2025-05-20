@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/token.utils';
 import { User } from '../models';
-import { ApiError } from './errorHandler';
+import { ApiError } from './error-handler.middleware';
 
 // Extend Express Request interface to include user
 declare global {

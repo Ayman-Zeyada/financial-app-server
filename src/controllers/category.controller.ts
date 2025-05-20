@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Category, Transaction } from '../models';
-import { ApiError } from '../middlewares/errorHandler';
+import { ApiError } from '../middlewares/error-handler.middleware';
 import { Op } from 'sequelize';
 
 export const createCategory = async (

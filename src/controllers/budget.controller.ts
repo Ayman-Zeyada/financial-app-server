@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { Budget, Category, Transaction } from '../models';
-import { ApiError } from '../middlewares/errorHandler';
+import { ApiError } from '../middlewares/error-handler.middleware';
 import { Op } from 'sequelize';
 import { sendBudgetAlert } from '../utils/email.utils';
+import webhookService from '../services/webhook.service';
+import socketService from '../services/socket.service';
+import { WebhookEvent } from '../models/webhook.model';
+import logger from '../utils/logger';
 
 export const createBudget = async (
   req: Request,
@@ -547,6 +551,30 @@ export const checkBudgetAlerts = async (): Promise<void> => {
             budget.name,
             progress.totalSpent - Number(budget.amount),
           );
+
+          webhookService
+            .triggerWebhook(WebhookEvent.BUDGET_ALERT, user.id, {
+              budgetId: budget.id,
+              budgetName: budget.name,
+              status: progress.status,
+              amount: budget.amount,
+              spent: progress.totalSpent,
+              overspent: progress.totalSpent - Number(budget.amount),
+              percentage: progress.percentage,
+            })
+            .catch((err) => logger.error(`Error triggering webhook: ${err}`));
+
+          if (socketService.isUserConnected(user.id)) {
+            socketService.emitBudgetAlert(user.id, {
+              budgetId: budget.id,
+              budgetName: budget.name,
+              status: progress.status,
+              amount: budget.amount,
+              spent: progress.totalSpent,
+              overspent: progress.totalSpent - Number(budget.amount),
+              percentage: progress.percentage,
+            });
+          }
         }
       }
     }

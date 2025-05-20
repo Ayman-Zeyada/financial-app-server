@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { User, UserPreference, FinancialGoal } from '../models';
-import { ApiError } from '../middlewares/errorHandler';
+import { ApiError } from '../middlewares/error-handler.middleware';
 import { sendNotificationEmail } from '../utils/email.utils';
 
 export const getUserProfile = async (

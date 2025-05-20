@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Transaction, Category, Budget } from '../models';
-import { ApiError } from '../middlewares/errorHandler';
+import { ApiError } from '../middlewares/error-handler.middleware';
 import { Op, Sequelize } from 'sequelize';
 import { sendMonthlySummary } from '../utils/email.utils';
 import { AggregationResult, DateAggregationResult, TransactionWithCategory } from '../models/types';

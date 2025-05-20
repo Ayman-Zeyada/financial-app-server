@@ -1,8 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { Op } from 'sequelize';
 import { Transaction, Category, User } from '../models';
-import { ApiError } from '../middlewares/errorHandler';
+import { ApiError } from '../middlewares/error-handler.middleware';
 import logger from '../utils/logger';
+import webhookService from '../services/webhook.service';
+import socketService from '../services/socket.service';
+import { WebhookEvent } from '../models/webhook.model';
+import { SocketEvent } from '../services/socket.service';
+import { clearCache } from '../middlewares/cache.middleware';
 
 export const createTransaction = async (
   req: Request,
@@ -58,6 +63,30 @@ export const createTransaction = async (
       categoryId,
     });
 
+    webhookService
+      .triggerWebhook(WebhookEvent.TRANSACTION_CREATED, req.user.userId, {
+        id: transaction.id,
+        amount: transaction.amount,
+        description: transaction.description,
+        date: transaction.date,
+        type: transaction.type,
+        categoryId: transaction.categoryId,
+      })
+      .catch((err) => logger.error(`Error triggering webhook: ${err}`));
+
+    if (socketService.isUserConnected(req.user.userId)) {
+      socketService.emitTransactionCreated(req.user.userId, {
+        id: transaction.id,
+        amount: transaction.amount,
+        description: transaction.description,
+        date: transaction.date,
+        type: transaction.type,
+        categoryId: transaction.categoryId,
+      });
+    }
+
+    clearCache(`${req.user.userId}:*transactions*`);
+
     res.status(201).json({
       status: 'success',
       message: 'Transaction created successfully',
@@ -86,11 +115,11 @@ export const getTransactions = async (
       type,
       categoryId,
       recurring,
-      limit = 50,
-      offset = 0,
       sortBy = 'date',
       sortOrder = 'DESC',
     } = req.query;
+
+    const { limit, offset } = req.pagination;
 
     const where: any = {
       userId: req.user.userId,
@@ -122,7 +151,9 @@ export const getTransactions = async (
       where.recurring = recurring === 'true';
     }
 
-    const transactions = await Transaction.findAndCountAll({
+    const count = await Transaction.count({ where });
+
+    const transactions = await Transaction.findAll({
       where,
       include: [
         {
@@ -130,16 +161,20 @@ export const getTransactions = async (
           attributes: ['id', 'name', 'color', 'icon'],
         },
       ],
-      limit: Number(limit),
-      offset: Number(offset),
+      limit,
+      offset,
       order: [[sortBy as string, sortOrder as string]],
     });
 
-    res.status(200).json({
-      status: 'success',
-      count: transactions.count,
-      data: transactions.rows,
-    });
+    if (res.paginate) {
+      res.status(200).json(res.paginate(transactions, count));
+    } else {
+      res.status(200).json({
+        status: 'success',
+        count,
+        data: transactions,
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -256,6 +291,30 @@ export const updateTransaction = async (
 
     await transaction.save();
 
+    webhookService
+      .triggerWebhook(WebhookEvent.TRANSACTION_UPDATED, req.user.userId, {
+        id: transaction.id,
+        amount: transaction.amount,
+        description: transaction.description,
+        date: transaction.date,
+        type: transaction.type,
+        categoryId: transaction.categoryId,
+      })
+      .catch((err) => logger.error(`Error triggering webhook: ${err}`));
+
+    if (socketService.isUserConnected(req.user.userId)) {
+      socketService.emitTransactionUpdated(req.user.userId, {
+        id: transaction.id,
+        amount: transaction.amount,
+        description: transaction.description,
+        date: transaction.date,
+        type: transaction.type,
+        categoryId: transaction.categoryId,
+      });
+    }
+
+    clearCache(`${req.user.userId}:*transactions*`);
+
     res.status(200).json({
       status: 'success',
       message: 'Transaction updated successfully',
@@ -293,7 +352,18 @@ export const deleteTransaction = async (
       throw error;
     }
 
+    const transactionId = transaction.id;
     await transaction.destroy();
+
+    webhookService
+      .triggerWebhook(WebhookEvent.TRANSACTION_DELETED, req.user.userId, { id: transactionId })
+      .catch((err) => logger.error(`Error triggering webhook: ${err}`));
+
+    if (socketService.isUserConnected(req.user.userId)) {
+      socketService.emitTransactionDeleted(req.user.userId, transactionId);
+    }
+
+    clearCache(`${req.user.userId}:*transactions*`);
 
     res.status(200).json({
       status: 'success',

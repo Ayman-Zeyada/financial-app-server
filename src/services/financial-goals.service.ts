@@ -2,6 +2,9 @@ import { FinancialGoal, Transaction, User } from '../models';
 import { Op } from 'sequelize';
 import { sendGoalAchievedNotification } from '../utils/email.utils';
 import logger from '../utils/logger';
+import webhookService from '../services/webhook.service';
+import socketService from '../services/socket.service';
+import { WebhookEvent } from '../models/webhook.model';
 
 class FinancialGoalsService {
   public async calculateGoalProgress(goalId: number): Promise<{
@@ -116,6 +119,28 @@ class FinancialGoalsService {
             Number(goal.currentAmount),
           );
         }
+
+        webhookService
+          .triggerWebhook(WebhookEvent.GOAL_ACHIEVED, goal.userId, {
+            goalId: goal.id,
+            goalName: goal.name,
+            targetAmount: Number(goal.targetAmount),
+            currentAmount: Number(goal.currentAmount),
+            targetDate: goal.targetDate,
+            category: goal.category,
+          })
+          .catch((err) => logger.error(`Error triggering webhook: ${err}`));
+
+        if (socketService.isUserConnected(goal.userId)) {
+          socketService.emitGoalAchieved(goal.userId, {
+            goalId: goal.id,
+            goalName: goal.name,
+            targetAmount: Number(goal.targetAmount),
+            currentAmount: Number(goal.currentAmount),
+            targetDate: goal.targetDate,
+            category: goal.category,
+          });
+        }
       } catch (error) {
         logger.error('Error sending goal achievement notification:', error);
       }
@@ -130,10 +155,6 @@ class FinancialGoalsService {
     };
   }
 
-  /**
-   * Check all active goals for a user and notify if any have been achieved
-   * @param userId The user ID
-   */
   public async checkGoalsProgress(userId: number): Promise<void> {
     try {
       const goals = await FinancialGoal.findAll({

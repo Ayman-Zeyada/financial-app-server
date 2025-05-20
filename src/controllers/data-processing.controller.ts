@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { dataProcessingService } from '../services/data-processing.service';
-import { ApiError } from '../middlewares/errorHandler';
+import { ApiError } from '../middlewares/error-handler.middleware';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -41,7 +41,7 @@ export const upload = multer({
 export const importTransactions = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -94,7 +94,7 @@ export const importTransactions = async (
 export const importCategories = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -147,7 +147,7 @@ export const importCategories = async (
 export const importBudgets = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -200,7 +200,7 @@ export const importBudgets = async (
 export const importFinancialGoals = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -253,7 +253,7 @@ export const importFinancialGoals = async (
 export const exportTransactions = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -277,7 +277,7 @@ export const exportTransactions = async (
     const result = await dataProcessingService.exportTransactionsToCSV(
       req.user.userId,
       filters,
-      filePath
+      filePath,
     );
 
     if (req.query.download === 'true') {
@@ -302,7 +302,7 @@ export const exportTransactions = async (
 export const exportCategories = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -341,7 +341,7 @@ export const exportCategories = async (
 export const exportBudgets = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -380,7 +380,7 @@ export const exportBudgets = async (
 export const exportFinancialGoals = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -419,7 +419,7 @@ export const exportFinancialGoals = async (
 export const downloadFile = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -429,7 +429,7 @@ export const downloadFile = async (
     }
 
     const { filename } = req.params;
-    
+
     const userId = req.user.userId;
     if (!filename.includes(`_${userId}_`)) {
       const error = new Error('Unauthorized access to file') as ApiError;
@@ -450,7 +450,7 @@ export const downloadFile = async (
 
     res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
-    
+
     const fileStream = fs.createReadStream(filePath);
     fileStream.pipe(res);
   } catch (error) {
@@ -461,7 +461,7 @@ export const downloadFile = async (
 export const validateImportFile = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (!req.user) {
@@ -483,8 +483,8 @@ export const validateImportFile = async (
     let validationResult;
     if (fileExt === '.csv') {
       const csvData = fs.readFileSync(filePath, 'utf8');
-      
-      switch(dataType) {
+
+      switch (dataType) {
         case 'transactions':
           validationResult = await dataProcessingService.validateTransactionCSV(csvData);
           break;
@@ -498,16 +498,16 @@ export const validateImportFile = async (
           validationResult = await dataProcessingService.validateGoalCSV(csvData);
           break;
         default:
-          validationResult = { 
-            valid: false, 
-            errors: ['Invalid data type. Must be one of: transactions, categories, budgets, goals'] 
+          validationResult = {
+            valid: false,
+            errors: ['Invalid data type. Must be one of: transactions, categories, budgets, goals'],
           };
       }
     } else if (fileExt === '.json') {
       const jsonData = fs.readFileSync(filePath, 'utf8');
       validationResult = dataProcessingService.validateJSONImport(
         jsonData,
-        dataType as 'transactions' | 'categories' | 'budgets' | 'goals'
+        dataType as 'transactions' | 'categories' | 'budgets' | 'goals',
       );
     } else {
       const error = new Error('Unsupported file format') as ApiError;
