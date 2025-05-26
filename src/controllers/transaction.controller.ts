@@ -6,7 +6,6 @@ import logger from '../utils/logger';
 import webhookService from '../services/webhook.service';
 import socketService from '../services/socket.service';
 import { WebhookEvent } from '../models/webhook.model';
-import { SocketEvent } from '../services/socket.service';
 import { clearCache } from '../middlewares/cache.middleware';
 
 export const createTransaction = async (

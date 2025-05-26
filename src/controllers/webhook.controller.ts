@@ -20,6 +20,7 @@ export const createWebhook = async (
     try {
       new URL(url);
     } catch (error) {
+      console.error('Invalid URL:', error);
       const apiError = new Error('Invalid URL') as ApiError;
       apiError.statusCode = 400;
       throw apiError;
@@ -169,6 +170,7 @@ export const updateWebhook = async (
         new URL(url);
         webhook.url = url;
       } catch (error) {
+        console.error('Invalid URL:', error);
         const apiError = new Error('Invalid URL') as ApiError;
         apiError.statusCode = 400;
         throw apiError;

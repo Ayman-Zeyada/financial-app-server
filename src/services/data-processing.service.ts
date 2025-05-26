@@ -1024,8 +1024,6 @@ class DataProcessingService {
         };
       }
 
-      const errors: string[] = [];
-
       switch (dataType) {
         case 'transactions':
           return this.validateTransactionsJSON(data);

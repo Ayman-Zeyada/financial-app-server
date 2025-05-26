@@ -3,7 +3,7 @@ import { Transaction, Category, Budget } from '../models';
 import { ApiError } from '../middlewares/error-handler.middleware';
 import { Op, Sequelize } from 'sequelize';
 import { sendMonthlySummary } from '../utils/email.utils';
-import { AggregationResult, DateAggregationResult, TransactionWithCategory } from '../models/types';
+import { TransactionWithCategory } from '../models/types';
 
 export const getIncomeVsExpenses = async (
   req: Request,
@@ -690,7 +690,6 @@ export const getTrendAnalysis = async (
 
       const first = data[0];
       const last = data[data.length - 1];
-      const average = data.reduce((sum, val) => sum + val, 0) / data.length;
 
       if (first === 0) return { trend: 'increasing', percentage: 100 };
 

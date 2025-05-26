@@ -11,7 +11,6 @@ import {
 } from '../utils/token.utils';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../utils/email.utils';
 import { ApiError } from '../middlewares/error-handler.middleware';
-import logger from '../utils/logger';
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
