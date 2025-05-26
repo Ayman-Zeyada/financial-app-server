@@ -9,9 +9,9 @@ export interface UserAttributes {
   firstName: string;
   lastName: string;
   isVerified: boolean;
-  verificationToken?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpires?: Date;
+  verificationToken?: string | null;
+  resetPasswordToken?: string | null;
+  resetPasswordExpires?: Date | null;
   avatarUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -27,9 +27,9 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public firstName!: string;
   public lastName!: string;
   public isVerified!: boolean;
-  public verificationToken?: string;
-  public resetPasswordToken?: string;
-  public resetPasswordExpires?: Date;
+  public verificationToken?: string | null;
+  public resetPasswordToken?: string | null;
+  public resetPasswordExpires?: Date | null;
   public avatarUrl?: string;
 
   public readonly createdAt!: Date;

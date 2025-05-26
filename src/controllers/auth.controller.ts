@@ -178,7 +178,7 @@ export const verifyEmail = async (
       throw error;
     }
     user.isVerified = true;
-    user.verificationToken = undefined;
+    user.verificationToken = null;
     await user.save();
 
     res.status(200).json({
@@ -254,8 +254,8 @@ export const resetPassword = async (
     const hashedPassword = await bcrypt.hash(password, 10);
 
     user.password = hashedPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
     await user.save();
 
     res.status(200).json({

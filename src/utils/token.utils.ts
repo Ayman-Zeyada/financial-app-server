@@ -1,6 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { UserAttributes } from '../models/user.model';
 import logger from './logger';
+import crypto from 'crypto';
 
 interface TokenPayload {
   userId: number;
@@ -18,7 +19,10 @@ export const generateAccessToken = (user: UserAttributes): string => {
   // Default to 1 day in seconds if not provided
   const expiresIn = process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) : 86400; // 1 day in seconds
 
-  return jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn });
+  return jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', {
+    expiresIn,
+    jwtid: crypto.randomBytes(16).toString('hex'),
+  });
 };
 
 export const generateRefreshToken = (user: UserAttributes): string => {
@@ -33,7 +37,10 @@ export const generateRefreshToken = (user: UserAttributes): string => {
     ? parseInt(process.env.JWT_REFRESH_EXPIRES_IN)
     : 604800; // 7 days in seconds
 
-  return jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', { expiresIn });
+  return jwt.sign(payload, process.env.JWT_SECRET || 'fallback_secret', {
+    expiresIn,
+    jwtid: crypto.randomBytes(16).toString('hex'),
+  });
 };
 
 export const verifyToken = (token: string): TokenPayload | null => {

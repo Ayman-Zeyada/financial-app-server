@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger';
 
-const memoryCache: { [key: string]: { data: any; expiry: number } } = {};
+const memoryCache: { [key: string]: { data: any; expiry: number; statusCode: number } } = {};
 
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
 setInterval(() => {
@@ -26,11 +26,30 @@ declare global {
   }
 }
 
+const SKIP_CACHE_ROUTES = [
+  '/api/auth/',
+  '/api/users/',
+  '/api/transactions/',
+  '/api/budgets/',
+  '/api/categories/',
+  '/api/financial-goals/',
+  '/api/reports/',
+  '/api/webhooks/',
+  '/api/data-processing/',
+];
+
+const shouldSkipCache = (req: Request): boolean => {
+  if (req.method !== 'GET') {
+    return true;
+  }
+
+  return SKIP_CACHE_ROUTES.some((route) => req.path.startsWith(route));
+};
+
 export const simpleCacheMiddleware = (options: SimpleCacheOptions = {}) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (req.method !== 'GET') {
-      next();
-      return;
+    if (shouldSkipCache(req)) {
+      return next();
     }
 
     let cacheKey: string;
@@ -50,7 +69,7 @@ export const simpleCacheMiddleware = (options: SimpleCacheOptions = {}) => {
     const cachedItem = memoryCache[cacheKey];
     if (cachedItem && cachedItem.expiry > Date.now()) {
       logger.debug(`Cache hit: ${cacheKey}`);
-      res.status(200).json(cachedItem.data);
+      res.status(cachedItem.statusCode).json(cachedItem.data);
       return;
     }
 
@@ -64,6 +83,7 @@ export const simpleCacheMiddleware = (options: SimpleCacheOptions = {}) => {
 
         memoryCache[cacheKey] = {
           data: body,
+          statusCode: res.statusCode,
           expiry: Date.now() + ttl * 1000,
         };
 
