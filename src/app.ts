@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import http from 'http';
+import swaggerUi from 'swagger-ui-express';
 
 import routes from './routes';
 import { errorHandler, notFound } from './middlewares/error-handler.middleware';
@@ -13,6 +14,7 @@ import socketService from './services/socket.service';
 import { rateLimiter } from './middlewares/rate-limiter.middleware';
 import { paginationMiddleware } from './middlewares/pagination.middleware';
 import { simpleCacheMiddleware } from './middlewares/cache.middleware';
+import { swaggerSpec } from './config/swagger';
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -59,6 +61,32 @@ const cacheMw = simpleCacheMiddleware({
   ttl: 300, // 5 minutes
 });
 app.use(cacheMw);
+
+if (process.env.NODE_ENV !== 'production') {
+  const swaggerOptions = {
+    explorer: true,
+    customCss: `
+      .swagger-ui .topbar { display: none }
+      .swagger-ui .info .title { color: #3b82f6; }
+    `,
+    customSiteTitle: 'Financial App API Documentation',
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      filter: true,
+      tryItOutEnabled: true,
+    },
+  };
+
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
+
+  app.get('/api-docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
+
+  logger.info('Swagger documentation available at /api-docs');
+}
 
 app.use('/api', routes);
 
